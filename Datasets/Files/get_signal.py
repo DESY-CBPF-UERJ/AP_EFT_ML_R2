@@ -27,7 +27,7 @@ if args.version == "9":
     if args.period == "0_16":
         campaign = "RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11"
     elif args.period == "1_16":
-        campaign = "RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17"
+        campaign = "RunIISummer20UL16NanoAODv9-BPH_106X_mcRun2_asymptotic_v17" # different for EFT sample
     elif args.period == "0_17":
         campaign = "RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9"
     elif args.period == "0_18":
@@ -50,12 +50,9 @@ if os.path.isdir(basedir) is False:
 
     
 datasets = [
-["Signal_400_100",          "/bbHToZaToLLChiChi_2HDMa_MH-400_Ma-100_MChi-45_TuneCP5_13TeV_madgraph-pythia8/" + campaign],
-["Signal_400_200",          "/bbHToZaToLLChiChi_2HDMa_MH-400_Ma-200_MChi-45_TuneCP5_13TeV_madgraph-pythia8/" + campaign],
-["Signal_500_100",          "/bbHToZaToLLChiChi_2HDMa_MH-500_Ma-100_MChi-45_TuneCP5_13TeV_madgraph-pythia8/" + campaign],
-["Signal_500_200",          "/bbHToZaToLLChiChi_2HDMa_MH-500_Ma-200_MChi-45_TuneCP5_13TeV_madgraph-pythia8/" + campaign],
-["Signal_500_300",          "/bbHToZaToLLChiChi_2HDMa_MH-500_Ma-300_MChi-45_TuneCP5_13TeV_madgraph-pythia8/" + campaign],
-["Signal_600_100",          "/bbHToZaToLLChiChi_2HDMa_MH-600_Ma-100_MChi-45_TuneCP5_13TeV_madgraph-pythia8/" + campaign],
+["Signal_TTto2L2Nu_MTT-0to700",     "/TTto2L2Nu-1Jets-smeft_MTT-0to700_TuneCP5_13TeV_madgraphMLM-pythia8/" + campaign],
+["Signal_TTto2L2Nu_MTT-700to900",   "/TTto2L2Nu-1Jets-smeft_MTT-700to900_TuneCP5_13TeV_madgraphMLM-pythia8/" + campaign],
+["Signal_TTto2L2Nu_MTT-900toInf",   "/TTto2L2Nu-1Jets-smeft_MTT-900toInf_TuneCP5_13TeV_madgraphMLM-pythia8/" + campaign],
 ]
 
 

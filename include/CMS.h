@@ -26,10 +26,6 @@
 #include "rapidjson/document.h"
 #include "rapidjson/filereadstream.h"
 #include "rapidcsv.h"
-#include <fdeep/fdeep.hpp>
-#include <fdeep/model.hpp>
-#include <torch/torch.h>
-#include <torch/script.h>
 
 using namespace std;
 

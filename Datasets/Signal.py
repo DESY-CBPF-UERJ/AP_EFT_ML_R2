@@ -1,4 +1,4 @@
-analysis = "AP_Template_R2"
+analysis = "AP_EFT_ML_R2"
 nano_version = 'v9'
 path_0_16 = analysis+'/Datasets/Files/signal_16/dti_0/'+nano_version+'/'
 path_1_16 = analysis+'/Datasets/Files/signal_16/dti_1/'+nano_version+'/'
@@ -27,14 +27,11 @@ for period,path in zip(periods,paths):
     year = period[-2:]
         
     Signal = [
-        ["Signal_400_100_"+period]           + [year+'0100'+dti, path+"Signal_400_100.txt"],
-        ["Signal_400_200_"+period]           + [year+'0101'+dti, path+"Signal_400_200.txt"],
-        ["Signal_500_100_"+period]           + [year+'0102'+dti, path+"Signal_500_100.txt"],
-        ["Signal_500_200_"+period]           + [year+'0103'+dti, path+"Signal_500_200.txt"],
-        ["Signal_500_300_"+period]           + [year+'0104'+dti, path+"Signal_500_300.txt"],
+        ["Signal_TTto2L2Nu_MTT-0to700_"+period]     + [year+'0100'+dti, path+"Signal_TTto2L2Nu_MTT-0to700.txt"],
+        ["Signal_TTto2L2Nu_MTT-700to900_"+period]   + [year+'0101'+dti, path+"Signal_TTto2L2Nu_MTT-700to900.txt"],
+        ["Signal_TTto2L2Nu_MTT-900toInf_"+period]   + [year+'0102'+dti, path+"Signal_TTto2L2Nu_MTT-900toInf.txt"],
     ]
 
-        
 
     if period == "0_16":
         Signal_0_16 = Signal

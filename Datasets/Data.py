@@ -1,4 +1,4 @@
-analysis = "AP_Template_R2"
+analysis = "AP_EFT_ML_R2"
 nano_version = 'v9'
 path_16 = analysis+'/Datasets/Files/data_16/'+nano_version+'/'
 path_17 = analysis+'/Datasets/Files/data_17/'+nano_version+'/'

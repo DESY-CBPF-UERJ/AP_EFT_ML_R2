@@ -9,7 +9,10 @@
 //-------------------------------------------------------------------------------------------------
 namespace Test{
 
-    //int variable1Name;   [example]
+    float MET_1_pt;
+    float MET_1_phi;
+    float MET_2_pt;
+    float MET_2_phi;
 }
 
 
@@ -34,7 +37,10 @@ void HEPHero::SetupTest() {
     //_outputTree->Branch("variable1NameInTheTree", &Test::variable1Name );  [example]
 
     //======SETUP INFORMATION IN OUTPUT HDF5 FILE==================================================
-    //HDF_insert("variable1NameInTheTree", &Test::variable1Name );  [example]
+    HDF_insert("MET_1_pt", &Test::MET_1_pt );
+    HDF_insert("MET_1_phi", &Test::MET_1_phi );
+    HDF_insert("MET_2_pt", &Test::MET_2_pt );
+    HDF_insert("MET_2_phi", &Test::MET_2_phi );
 
     return;
 }
@@ -61,7 +67,12 @@ bool HEPHero::TestRegion() {
 void HEPHero::TestSelection() {
 
 
+    JetSelection();
+    METCorrection();
 
+
+
+    Weight_corrections();
 
 
 
@@ -83,7 +94,7 @@ void HEPHero::TestSelection() {
     //_outputTree->Fill();
 
     //======FILL THE OUTPUT HDF5 INFO===============================================================
-    //HDF_fill();
+    HDF_fill();
 
     return;
 }

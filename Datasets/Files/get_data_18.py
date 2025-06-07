@@ -17,7 +17,6 @@ if args.version != "9":
 
 if args.version == "9":
     campaign = "UL2018_MiniAODv2_NanoAODv9_GT36"
-    campaignEleD = "UL2018_MiniAODv2_NanoAODv9"
 
 
 basedir = "data_18/v"+args.version+"/"
@@ -40,7 +39,7 @@ datasets = [
 ["Ele_A",           "/EGamma/Run2018A-" + campaign],
 ["Ele_B",           "/EGamma/Run2018B-" + campaign],
 ["Ele_C",           "/EGamma/Run2018C-" + campaign],
-["Ele_D",           "/EGamma/Run2018D-" + campaignEleD],
+["Ele_D",           "/EGamma/Run2018D-" + campaign],
 ["MET_A",           "/MET/Run2018A-" + campaign],
 ["MET_B",           "/MET/Run2018B-" + campaign],
 ["MET_C",           "/MET/Run2018C-" + campaign],
