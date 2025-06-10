@@ -1,3 +1,13 @@
+# Arquivos de conf do meu projeto
+ana/CMakeFiles
+ana/Makefile
+ana/cmake_install.cmake
+src/CMakeFiles
+src/Makefile
+src/cmake_install.cmake
+ana/local_output/
+Metadata/ConfigFile_*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
