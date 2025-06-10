@@ -78,5 +78,8 @@ for period in paths.keys():
                 list_temp.append(ds[0]+"_"+era+"_"+period)
                 list_temp.append(ds[1]+year+dti)
                 list_temp.append(paths[period]+ds[0]+"_"+era+".txt")
+                list_temp.append(None)
+                list_temp.append(None)
                 d_ds[key+"_"+period].append(list_temp)
 
+print(d_ds)
