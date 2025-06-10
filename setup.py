@@ -37,7 +37,7 @@ analysis_parameters = {
 
 corrections = {  # 0-don't apply, 1-apply
 "PILEUP_WGT                 ": 1,
-"MET_XY_CORR                ": 1,
+"MET_XY_CORR                ": 0,
 "JER_CORR                   ": 1,
 "MUON_ROC_CORR              ": 1,
 }
