@@ -23,12 +23,12 @@ paths["1_23"] = analysis+'/Datasets/Files/bkg_23/dti_1/'+nano_version+'/'
 # Source[new2] > > https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
 # Source[new3] > > https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 b_ds_info = { # [DatasetName, Production ID, PROC_XSEC[pb], XSEC_UNC[pb], XSEC_Accuracy]
-"DYPt0To50" = [
+"DYPt0To50": [
     ["DYJetsToLL_Pt-0To3",                  '20',       6077.22,            122.45,             '[new1]NNLO'],
     ["DYJetsToLL_PtZ-3To50",                '20',       1414.0,             0,                  '[new1]NNLO*'],
 ],
 
-"DYPt50ToInf" = [
+"DYPt50ToInf": [
     ["DYJetsToLL_PtZ-50To100",              '21',       378.97,             0,                  '[new1]NNLO*'],
     ["DYJetsToLL_PtZ-100To250",             '21',       93.1366,            0,                  '[new1]NNLO*'],
     ["DYJetsToLL_PtZ-250To400",             '21',       3.7093,             0,                  '[new1]NNLO*'],
@@ -36,15 +36,15 @@ b_ds_info = { # [DatasetName, Production ID, PROC_XSEC[pb], XSEC_UNC[pb], XSEC_A
     ["DYJetsToLL_PtZ-650ToInf",             '21',       0.048934,           0,                  '[new1]NNLO*'],
 ],
 
-"TTFullLep" = [
+"TTFullLep": [
     ["TTTo2L2Nu",                           '22',       88.51,              0,                  '[new2]NNLO+NNLL'],
 ],
 
-"TTSemiLep" = [
+"TTSemiLep": [
     ["TTToSemiLeptonic",                    '23',       366.29,             0,                  '[new2]NNLO+NNLL'],
 ],
 
-"ST" = [
+"ST": [
     ["ST_tW_top",                           '24',       35.85,              (1.92,1.92),        '[new3]NLO'],
     ["ST_tW_antitop",                       '24',       35.85,              (1.92,1.92),        '[new3]NLO'],
     ["ST_t-channel_top",                    '24',       136.02,             (7.72,6.56),        '[new3]NLO'],
@@ -52,13 +52,13 @@ b_ds_info = { # [DatasetName, Production ID, PROC_XSEC[pb], XSEC_UNC[pb], XSEC_A
     ["ST_s-channel",                        '24',       10.32,              (0.20,0.18),        '[new3]NLO'],
 ],
 
-"VZ" = [
+"VZ": [
     ["ZZTo2L2Nu",                           '25',       0.9738,             0.0009971,          'NLO'],
     ["ZZTo4L",                              '25',       1.325,              0.00122             'NLO'],
     ["WZTo3LNu",                            '25',       4.664,              0.004639            'NLO'],
 ],
 
-"ResidualSM" = [
+"ResidualSM": [
     ["ZZTo2Q2L",                            '26',       3.676,              0                   'unknown'],
     ["WZTo2Q2L",                            '26',       6.565,              0.01984             'NLO'],
     ["WWTo2L2Nu",                           '26',       11.09,              0.00704		        'NLO'],
