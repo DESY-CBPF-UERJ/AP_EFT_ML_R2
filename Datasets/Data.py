@@ -36,7 +36,7 @@ lumis["0_18"] = [59832.4753,    2.5,  1.5,  2.0,  0.2]
 d_ds_info = {}
 d_ds_info["0_16"] = { # [DatasetName, Production ID]
 "Data_Lep": [
-    ["Data_MuEle",          '00'],
+    ["Data_EleMu",          '00'],
     ["Data_DoubleMu",       '00'],
     ["Data_DoubleEle",      '00'],
     ["Data_SingleMu",       '00'],
@@ -50,7 +50,7 @@ d_ds_info["1_16"] = d_ds_info["0_16"].copy()
 d_ds_info["0_17"] = d_ds_info["0_16"].copy()
 d_ds_info["0_18"] = { # [DatasetName, Production ID]
 "Data_Lep": [
-    ["Data_MuEle",          '00'],
+    ["Data_EleMu",          '00'],
     ["Data_DoubleMu",       '00'],
     ["Data_SingleMu",       '00'],
     ["Data_Ele",            '00'],
