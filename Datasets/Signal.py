@@ -10,10 +10,10 @@ nano_version = 'v9'
 #--------------------------------------------------------------------------------------------------
 
 paths = {}
-paths["0_22"] = analysis+'/Datasets/Files/signal_22/dti_0/'+nano_version+'/'
-paths["1_22"] = analysis+'/Datasets/Files/signal_22/dti_1/'+nano_version+'/'
-paths["0_23"] = analysis+'/Datasets/Files/signal_23/dti_0/'+nano_version+'/'
-paths["1_23"] = analysis+'/Datasets/Files/signal_23/dti_1/'+nano_version+'/'
+paths["0_16"] = analysis+'/Datasets/Files/signal_16/dti_0/'+nano_version+'/'
+paths["1_16"] = analysis+'/Datasets/Files/signal_16/dti_1/'+nano_version+'/'
+paths["0_17"] = analysis+'/Datasets/Files/signal_17/dti_0/'+nano_version+'/'
+paths["0_18"] = analysis+'/Datasets/Files/signal_18/dti_0/'+nano_version+'/'
 
 
 s_ds_info = { # [DatasetName, Production ID, PROC_XSEC[pb], XSEC_UNC[pb], XSEC_Accuracy]

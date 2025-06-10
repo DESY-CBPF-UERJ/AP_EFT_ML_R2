@@ -10,10 +10,10 @@ nano_version = 'v9'
 #--------------------------------------------------------------------------------------------------
 
 paths = {}
-paths["0_22"] = analysis+'/Datasets/Files/bkg_22/dti_0/'+nano_version+'/'
-paths["1_22"] = analysis+'/Datasets/Files/bkg_22/dti_1/'+nano_version+'/'
-paths["0_23"] = analysis+'/Datasets/Files/bkg_23/dti_0/'+nano_version+'/'
-paths["1_23"] = analysis+'/Datasets/Files/bkg_23/dti_1/'+nano_version+'/'
+paths["0_16"] = analysis+'/Datasets/Files/bkg_16/dti_0/'+nano_version+'/'
+paths["1_16"] = analysis+'/Datasets/Files/bkg_16/dti_1/'+nano_version+'/'
+paths["0_17"] = analysis+'/Datasets/Files/bkg_17/dti_0/'+nano_version+'/'
+paths["0_18"] = analysis+'/Datasets/Files/bkg_18/dti_0/'+nano_version+'/'
 
 
 # https://xsecdb-xsdb-official.app.cern.ch/
