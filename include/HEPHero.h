@@ -22,17 +22,16 @@ class HEPHero : public HEPBase {
     private:
         static HEPHero* _instance;
 
-        bool RunRoutines();
-        void PreRoutines();
-        
         HEPHero() {}
         HEPHero( char* configFileName );
 
+        bool RunRoutines();
+        void PreRoutines();
+        bool MC_processing();
         void Weight_corrections();
         void VerticalSysSizes();
         void VerticalSys();
         void FillControlVariables( string key, string value);
-        bool MC_processing();
         void SetupAna();
         bool AnaRegion();
         void AnaSelection();
