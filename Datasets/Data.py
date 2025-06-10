@@ -82,4 +82,3 @@ for period in paths.keys():
                 list_temp.append(None)
                 d_ds[key+"_"+period].append(list_temp)
 
-print(d_ds)
