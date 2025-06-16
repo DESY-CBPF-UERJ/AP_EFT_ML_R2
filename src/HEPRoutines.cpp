@@ -110,11 +110,20 @@ void HEPHero::PreRoutines() {
 //-------------------------------------------------------------------------------------------------
 bool HEPHero::RunRoutines() {
     
+    //======SUM THE GENERATOR WEIGHTS=================================================
+    if( dataset_group != "Data" ){
+        SumGenWeights_original += genWeight;
+        SumGenWeights += genWeight;
+    }
 
-    //======SUM THE GENERATOR WEIGHTS================================================
-    SumGenWeights += genWeight;
 
+    //======MC SAMPLES PROCESSING=====================================================
     if( !MC_processing() ) return false;
+
+
+    //======START EVENT WEIGHT========================================================
+    evtWeight = 1.;
+    if( dataset_group != "Data" ) evtWeight = genWeight;
 
     
     return true;
