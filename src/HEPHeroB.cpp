@@ -8,16 +8,29 @@ void HEPHero::FillControlVariables( string key, string value){
 
     //----CORRECTIONS------------------------------------------------------------------------------
     if( key == "PILEUP_WGT"                 )   apply_pileup_wgt = ( atoi(value.c_str()) == 1 );
+    if( key == "PREFIRING_WGT"              )   apply_prefiring_wgt = ( atoi(value.c_str()) == 1 );
+    if( key == "ELECTRON_ID_WGT"            )   apply_electron_wgt = ( atoi(value.c_str()) == 1 );
+    if( key == "MUON_ID_WGT"                )   apply_muon_wgt = ( atoi(value.c_str()) == 1 );
+    if( key == "JET_PUID_WGT"               )   apply_jet_puid_wgt = ( atoi(value.c_str()) == 1 );
+    if( key == "BTAG_WGT"                   )   apply_btag_wgt = ( atoi(value.c_str()) == 1 );
     if( key == "MET_XY_CORR"                )   apply_met_xy_corr = ( atoi(value.c_str()) == 1 );
     if( key == "JER_CORR"                   )   apply_jer_corr = ( atoi(value.c_str()) == 1 );
     if( key == "MUON_ROC_CORR"              )   apply_muon_roc_corr = ( atoi(value.c_str()) == 1 );
 
     //----METADATA FILES---------------------------------------------------------------------------
     if( key == "pileup"                     )   pileup_file = value;
+    if( key == "electron"                   )   electron_file = value;
+    if( key == "muon"                       )   muon_file = value;
+    if( key == "jet_puID"                   )   jet_puid_file = value;
+    if( key == "btag_SF"                    )   btag_SF_file = value;
+    if( key == "btag_eff"                   )   btag_eff_file = value;
     if( key == "met_xy"                     )   met_xy_file = value;
     if( key == "jerc"                       )   jerc_file = value;
     if( key == "jer_smear"                  )   jer_smear_file = value;
     if( key == "mu_RoccoR"                  )   muon_roc_file = value;
+    if( key == "ttbar_PDF"                  )   ttbar_pdf_file = value;
+    if( key == "ttbar_Res"                  )   ttbar_resolution_file = value;
+    if( key == "lumi_certificate"           )   certificate_file = value;
 
     //----SELECTION--------------------------------------------------------------------------------
     if( key == "JET_ETA_CUT"                )   JET_ETA_CUT = atof(value.c_str());
@@ -39,12 +52,9 @@ void HEPHero::FillControlVariables( string key, string value){
     if( key == "MUON_ISO_WP"                )   MUON_ISO_WP = atoi(value.c_str());
 
     if( key == "LEADING_LEP_PT_CUT"         )   LEADING_LEP_PT_CUT = atof(value.c_str());
-    if( key == "LEPLEP_PT_CUT"              )   LEPLEP_PT_CUT = atof(value.c_str());
+    if( key == "LEPLEP_MASS_CUT"            )   LEPLEP_MASS_CUT = atof(value.c_str());
     if( key == "MET_CUT"                    )   MET_CUT = atof(value.c_str());
-    if( key == "LEPLEP_DR_CUT"              )   LEPLEP_DR_CUT = atof(value.c_str());
     if( key == "LEPLEP_DM_CUT"              )   LEPLEP_DM_CUT = atof(value.c_str());
-    if( key == "MET_LEPLEP_DPHI_CUT"        )   MET_LEPLEP_DPHI_CUT = atof(value.c_str());
-    if( key == "MET_LEPLEP_MT_CUT"          )   MET_LEPLEP_MT_CUT = atof(value.c_str());
 
 }
 
@@ -449,6 +459,10 @@ void HEPHero::SetupAna(){
     else if( _SELECTION == "Test" ) SetupTest();
     else if( _SELECTION == "SgnStudy" ) SetupSgnStudy();
     else if( _SELECTION == "Sonnenschein" ) SetupSonnenschein();
+    else if( _SELECTION == "CompareEff" ) SetupCompareEff();
+    else if( _SELECTION == "Zrecoil" ) SetupZrecoil();
+    else if( _SELECTION == "TestWgt" ) SetupTestWgt();
+    else if( _SELECTION == "BTagEffMap" ) SetupBTagEffMap();
     // SETUP YOUR SELECTION HERE
     else {
       cout << "Unknown selection requested. Exiting. " << endl;
@@ -461,6 +475,10 @@ bool HEPHero::AnaRegion(){
     if( _SELECTION == "Test" && !TestRegion() ) Selected = false;
     if( _SELECTION == "SgnStudy" && !SgnStudyRegion() ) Selected = false;
     if( _SELECTION == "Sonnenschein" && !SonnenscheinRegion() ) Selected = false;
+    if( _SELECTION == "CompareEff" && !CompareEffRegion() ) Selected = false;
+    if( _SELECTION == "Zrecoil" && !ZrecoilRegion() ) Selected = false;
+    if( _SELECTION == "TestWgt" && !TestWgtRegion() ) Selected = false;
+    if( _SELECTION == "BTagEffMap" && !BTagEffMapRegion() ) Selected = false;
     // SET THE REGION OF YOUR SELECTION HERE
 
     return Selected;
@@ -470,6 +488,10 @@ void HEPHero::AnaSelection(){
     if( _SELECTION == "Test" ) TestSelection();
     if( _SELECTION == "SgnStudy" ) SgnStudySelection();
     if( _SELECTION == "Sonnenschein" ) SonnenscheinSelection();
+    if( _SELECTION == "CompareEff" ) CompareEffSelection();
+    if( _SELECTION == "Zrecoil" ) ZrecoilSelection();
+    if( _SELECTION == "TestWgt" ) TestWgtSelection();
+    if( _SELECTION == "BTagEffMap" ) BTagEffMapSelection();
     // CALL YOUR SELECTION HERE
 }
 
@@ -477,6 +499,10 @@ void HEPHero::AnaSystematic(){
     if( _SELECTION == "Test" ) TestSystematic();
     if( _SELECTION == "SgnStudy" ) SgnStudySystematic();
     if( _SELECTION == "Sonnenschein" ) SonnenscheinSystematic();
+    if( _SELECTION == "CompareEff" ) CompareEffSystematic();
+    if( _SELECTION == "Zrecoil" ) ZrecoilSystematic();
+    if( _SELECTION == "TestWgt" ) TestWgtSystematic();
+    if( _SELECTION == "BTagEffMap" ) BTagEffMapSystematic();
     // PRODUCE THE SYSTEMATIC OF YOUR SELECTION HERE
 }
 
@@ -484,6 +510,10 @@ void HEPHero::FinishAna(){
     if( _SELECTION == "Test" ) FinishTest();
     if( _SELECTION == "SgnStudy" ) FinishSgnStudy();
     if( _SELECTION == "Sonnenschein" ) FinishSonnenschein();
+    if( _SELECTION == "CompareEff" ) FinishCompareEff();
+    if( _SELECTION == "Zrecoil" ) FinishZrecoil();
+    if( _SELECTION == "TestWgt" ) FinishTestWgt();
+    if( _SELECTION == "BTagEffMap" ) FinishBTagEffMap();
     // FINISH YOUR SELECTION HERE
 }
    

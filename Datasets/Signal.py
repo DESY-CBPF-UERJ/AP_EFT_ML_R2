@@ -18,9 +18,9 @@ paths["0_18"] = analysis+'/Datasets/Files/signal_18/dti_0/'+nano_version+'/'
 
 s_ds_info = { # [DatasetName, Production ID, PROC_XSEC[pb], XSEC_UNC[pb], XSEC_Accuracy]
 "Signal": [
-    ["Signal_TTto2L2Nu_MTT-0to700",     '10',       88.51,              0.,                'unknown'],
-    ["Signal_TTto2L2Nu_MTT-700to900",   '10',       88.51,              0.,                'unknown'],
-    ["Signal_TTto2L2Nu_MTT-900toInf",   '10',       88.51,              0.,                'unknown'],
+    ["Signal_TTto2L2Nu_MTT-0to700",     '10',       108.1758,              0.,                'unknown'],
+    ["Signal_TTto2L2Nu_MTT-700to900",   '10',       13.76548,              0.,                'unknown'],
+    ["Signal_TTto2L2Nu_MTT-900toInf",   '10',       22.77864,              0.,                'unknown'],
 ],
 }
 

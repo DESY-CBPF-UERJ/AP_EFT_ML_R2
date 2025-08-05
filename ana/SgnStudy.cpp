@@ -13,10 +13,6 @@ namespace SgnStudy{
     int Nleptons;
     float mtt;
     float chel;
-
-    float test1Weight;
-    float test2Weight;
-    float test3Weight;
     vector<float> eftWeights;
 
 }
@@ -32,6 +28,7 @@ void HEPHero::SetupSgnStudy() {
     _cutFlow.insert(pair<string,double>("1_2OSpairs", 0) );
 
     //======SETUP HISTOGRAMS=======================================================================
+    makeHist( "chel", 100, -1., 1., "chel", "events" ); 
     //makeHist( "histogram1DName", 40, 0., 40., "xlabel", "ylabel" );   [example]
     //makeHist( "histogram2DName", 40, 0., 40., 100, 0., 50., "xlabel",  "ylabel", "zlabel", "COLZ" );   [example]
 
@@ -45,15 +42,11 @@ void HEPHero::SetupSgnStudy() {
 
     //======SETUP INFORMATION IN OUTPUT HDF5 FILE==================================================
     HDF_insert("genWeight", &genWeight );
-    HDF_insert("Ntops", &SgnStudy::Ntops );
-    HDF_insert("Nleptons", &SgnStudy::Nleptons );
+    //HDF_insert("Ntops", &SgnStudy::Ntops );
+    //HDF_insert("Nleptons", &SgnStudy::Nleptons );
     HDF_insert("mtt", &SgnStudy::mtt );
     HDF_insert("chel", &SgnStudy::chel );
-    HDF_insert("nLHEReweightingWeight", &nLHEReweightingWeight );
-
-    HDF_insert("test1Weight", &SgnStudy::test1Weight );
-    HDF_insert("test2Weight", &SgnStudy::test2Weight );
-    HDF_insert("test3Weight", &SgnStudy::test3Weight );
+    //HDF_insert("nLHEReweightingWeight", &nLHEReweightingWeight );
     HDF_insert("eftWeights", &SgnStudy::eftWeights );
 
 
@@ -125,6 +118,7 @@ void HEPHero::SgnStudySelection() {
     float aTop_pt, aTop_eta, aTop_phi, aTop_m;
     float pLep_pt, pLep_eta, pLep_phi, pLep_m;
     float aLep_pt, aLep_eta, aLep_phi, aLep_m;
+    
     if( GenPart_pdgId[tops[0]] > 0 ){
         pTop_pt = GenPart_pt[tops[0]]; pTop_eta = GenPart_eta[tops[0]]; pTop_phi = GenPart_phi[tops[0]]; pTop_m = GenPart_mass[tops[0]];
         aTop_pt = GenPart_pt[tops[1]]; aTop_eta = GenPart_eta[tops[1]]; aTop_phi = GenPart_phi[tops[1]]; aTop_m = GenPart_mass[tops[1]];
@@ -132,6 +126,7 @@ void HEPHero::SgnStudySelection() {
         pTop_pt = GenPart_pt[tops[1]]; pTop_eta = GenPart_eta[tops[1]]; pTop_phi = GenPart_phi[tops[1]]; pTop_m = GenPart_mass[tops[1]];
         aTop_pt = GenPart_pt[tops[0]]; aTop_eta = GenPart_eta[tops[0]]; aTop_phi = GenPart_phi[tops[0]]; aTop_m = GenPart_mass[tops[0]];
     }
+    
     if( GenPart_pdgId[leptons[0]] > 0 ){
         pLep_pt = GenPart_pt[leptons[0]]; pLep_eta = GenPart_eta[leptons[0]]; pLep_phi = GenPart_phi[leptons[0]]; pLep_m = GenPart_mass[leptons[0]];
         aLep_pt = GenPart_pt[leptons[1]]; aLep_eta = GenPart_eta[leptons[1]]; aLep_phi = GenPart_phi[leptons[1]]; aLep_m = GenPart_mass[leptons[1]];
@@ -147,7 +142,9 @@ void HEPHero::SgnStudySelection() {
     static const int icHel = index_with_key(spin_corr, "cHel");
     SgnStudy::chel = spin_corr[icHel].second;
 
+    _histograms1D.at("chel").Fill( SgnStudy::chel, evtWeight );
 
+    /*
     SgnStudy::test1Weight = 0;
     SgnStudy::test2Weight = 0;
     SgnStudy::test3Weight = 0;
@@ -156,12 +153,13 @@ void HEPHero::SgnStudySelection() {
         SgnStudy::test2Weight = LHEReweightingWeight[27]; //EFTrwgt27
         SgnStudy::test3Weight = LHEReweightingWeight[103]; //EFTrwgt103
     }
+    */
 
-    vector<int> basis_idx = {200, 201, 202, 203, 204, 207, 208, 209, 210, 211, 217, 218, 219, 220, 223, 224, 225, 226, 227, 233, 234, 235, 238, 239, 240, 241, 242, 248, 249, 252, 253, 254, 255, 256, 262, 265, 266, 267, 268, 269, 298, 299, 300, 301, 302, 308, 309, 310, 311, 317, 318, 319, 325, 326, 332};
+    //vector<int> basis_idx = {200, 201, 202, 203, 204, 207, 208, 209, 210, 211, 217, 218, 219, 220, 223, 224, 225, 226, 227, 233, 234, 235, 238, 239, 240, 241, 242, 248, 249, 252, 253, 254, 255, 256, 262, 265, 266, 267, 268, 269, 298, 299, 300, 301, 302, 308, 309, 310, 311, 317, 318, 319, 325, 326, 332};
 
     SgnStudy::eftWeights.clear();
-    for( unsigned int iwgt = 0; iwgt < basis_idx.size(); ++iwgt ) {
-        SgnStudy::eftWeights.push_back(LHEReweightingWeight[basis_idx[iwgt]]);
+    for( unsigned int iwgt = 0; iwgt < nLHEReweightingWeight; ++iwgt ) {
+        SgnStudy::eftWeights.push_back(LHEReweightingWeight[iwgt]);
     }
 
 

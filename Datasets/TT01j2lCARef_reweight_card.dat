@@ -4,7 +4,7 @@
 # Reference Point: ctGIm 1 cQj18 3 cQj38 3 cQj11 3 cQj31 3 ctu8 3 ctd8 3 ctj8 3 cQu8 3 cQd8 3 ctu1 3 ctd1 3 ctj1 3 cQu1 3 cQd1 3
 change rwgt_dir rwgt
 
-launch --rwgt_name=reference_point
+#launch --rwgt_nameX=reference_point
 
 launch --rwgt_name=EFTrwgt0_ctGIm_m0p936_ctGRe_m0p77_cQj38_0p944_cQj18_2p709_cQu8_0p474_cQd8_m0p91_ctj8_1p553_ctu8_m0p911_ctd8_1p778_cQj31_1p266_cQj11_0p778_cQu1_0p409_cQd1_m0p332_ctj1_m2p023_ctu1_0p08_ctd1_m1p618
     set param_card ctGIm -0.936

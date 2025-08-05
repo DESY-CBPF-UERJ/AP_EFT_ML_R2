@@ -7,29 +7,29 @@
 //-------------------------------------------------------------------------------------------------
 // Define output variables
 //-------------------------------------------------------------------------------------------------
-namespace Test{
-    
+namespace TestWgt{
+
+    //int variable1Name;   [example]
 }
 
 
 //-------------------------------------------------------------------------------------------------
 // Define output derivatives
 //-------------------------------------------------------------------------------------------------
-void HEPHero::SetupTest() {
+void HEPHero::SetupTestWgt() {
 
     //======SETUP CUTFLOW==========================================================================
-    _cutFlow.insert(pair<string,double>("01_TwoLepOS", 0) );
+    _cutFlow.insert(pair<string,double>("01_Leptons", 0) );
     _cutFlow.insert(pair<string,double>("02_LeadingLepPt", 0) );
-    _cutFlow.insert(pair<string,double>("03_MET_Filters", 0) );
-    _cutFlow.insert(pair<string,double>("04_HEM_Filter", 0) );
-    _cutFlow.insert(pair<string,double>("05_Jets", 0) );
-    _cutFlow.insert(pair<string,double>("06_MET", 0) );
-    _cutFlow.insert(pair<string,double>("07_LepLepMass", 0) );
-    _cutFlow.insert(pair<string,double>("08_TTBAR_Reco", 0) );
-    _cutFlow.insert(pair<string,double>("09_Selected", 0) );
+    _cutFlow.insert(pair<string,double>("03_Jets", 0) );
+    _cutFlow.insert(pair<string,double>("04_MET", 0) );
+    _cutFlow.insert(pair<string,double>("05_MET_Filters", 0) );
+    _cutFlow.insert(pair<string,double>("06_HEM_Filter", 0) );
+    _cutFlow.insert(pair<string,double>("07_Selected", 0) );
+    
 
     //======SETUP HISTOGRAMS=======================================================================
-    makeHist( "chel", 100, -1., 1., "chel", "events" ); 
+    //makeHist( "histogram1DName", 40, 0., 40., "xlabel", "ylabel" );   [example]
     //makeHist( "histogram2DName", 40, 0., 40., 100, 0., 50., "xlabel",  "ylabel", "zlabel", "COLZ" );   [example]
 
     //======SETUP SYSTEMATIC HISTOGRAMS============================================================
@@ -38,35 +38,27 @@ void HEPHero::SetupTest() {
     //makeSysHist( "histogram2DSysName", 40, 0., 40., 100, 0., 50., "xlabel",  "ylabel", "zlabel", "COLZ" );   [example]
 
     //======SETUP OUTPUT BRANCHES==================================================================
-    //_outputTree->Branch("variable1NameInTheTree", &Test::variable1Name );  [example]
+    //_outputTree->Branch("variable1NameInTheTree", &TestWgt::variable1Name );  [example]
 
     //======SETUP INFORMATION IN OUTPUT HDF5 FILE==================================================
-    HDF_insert( "RecoLepID", &RecoLepID );
-    HDF_insert( "RegionID", &RegionID );
-    HDF_insert( "MET_pt", &MET_pt );
-    HDF_insert("ttbar_mass", &ttbar_mass );
-    HDF_insert("ttbar_chel", &ttbar_chel );
-    
-    HDF_insert( "LepLep_pt", &LepLep_pt );
-    HDF_insert( "LepLep_deltaR", &LepLep_deltaR );
-    HDF_insert( "LepLep_deltaM", &LepLep_deltaM );
-    HDF_insert( "LepLep_mass", &LepLep_mass );
-    
-    HDF_insert( "LeadingLep_pt", &LeadingLep_pt );
-    HDF_insert( "TrailingLep_pt", &TrailingLep_pt );
+    HDF_insert( "prefiring_wgt", &prefiring_wgt );
+    HDF_insert( "pileup_wgt", &pileup_wgt );
+    HDF_insert( "electron_wgt", &electron_wgt );
+    HDF_insert( "muon_wgt", &muon_wgt );
+    HDF_insert( "jet_puid_wgt", &jet_puid_wgt );
+    HDF_insert( "btag_wgt", &btag_wgt );
+    //HDF_insert( "trigger_wgt", &trigger_wgt );
+    //HDF_insert( "top_pt_wgt", &top_pt_wgt );
+
+    HDF_insert( "Nelectrons", &Nelectrons );
+    HDF_insert( "Nmuons", &Nmuons );
     HDF_insert( "Nbjets", &Nbjets );
+    HDF_insert( "Njets_below50", &Njets_below50 );
+    //HDF_insert( "PV_npvs", &PV_npvs );
+    HDF_insert( "PV_npvsGood", &PV_npvsGood );
+    HDF_insert( "MET_pt", &MET_pt );
     
-    HDF_insert( "MET_LepLep_deltaPhi", &MET_LepLep_deltaPhi );
-    HDF_insert( "MET_LepLep_Mt", &MET_LepLep_Mt );
-    HDF_insert( "MT2LL", &MT2LL );
-    
-    HDF_insert( "Njets", &Njets );
-    HDF_insert( "HT30", &HT30 );
-    HDF_insert( "MHT30", &MHT30 );
-    //HDF_insert( "OmegaMin", &OmegaMin );
-    //HDF_insert( "ChiMin", &ChiMin );
-    //HDF_insert( "FMax", &FMax );
-    
+
     return;
 }
 
@@ -74,12 +66,12 @@ void HEPHero::SetupTest() {
 //-------------------------------------------------------------------------------------------------
 // Define the selection region
 //-------------------------------------------------------------------------------------------------
-bool HEPHero::TestRegion() {
+bool HEPHero::TestWgtRegion() {
 
     LeptonSelection();
 
-    if( !((RecoLepID > 0) && (RecoLepID < 2000)) ) return false;
-    _cutFlow.at("01_TwoLepOS") += evtWeight;
+    if( !(Nleptons >= 2) ) return false;
+    _cutFlow.at("01_Leptons") += evtWeight;
 
     Get_Leptonic_Info(true, false);
 
@@ -87,53 +79,33 @@ bool HEPHero::TestRegion() {
     _cutFlow.at("02_LeadingLepPt") += evtWeight;
 
     JetSelection();
+
+    if( !((Njets >= 2) && (Nbjets >= 1)) ) return false;
+    _cutFlow.at("03_Jets") += evtWeight;
+    
     METCorrection();
 
+    if( !(MET_pt > MET_CUT) ) return false;
+    _cutFlow.at("04_MET") += evtWeight;
+
     if( !METFilters() ) return false;
-    _cutFlow.at("03_MET_Filters") += evtWeight;
+    _cutFlow.at("05_MET_Filters") += evtWeight;
 
     HEMissue();
 
     if( !HEM_filter ) return false;
-    _cutFlow.at("04_HEM_Filter") += evtWeight;
-
-    if( !((Njets >= 2) && (Nbjets >= 1)) ) return false;
-    _cutFlow.at("05_Jets") += evtWeight;
-
-    if( !(MET_pt > MET_CUT) ) return false;
-    _cutFlow.at("06_MET") += evtWeight;
-
-    Get_LepLep_Variables();
-
-    if( !(LepLep_mass > LEPLEP_MASS_CUT) ) return false;
-    _cutFlow.at("07_LepLepMass") += evtWeight;
-
-    Get_ttbar_Variables();
-
-    if( !(ttbar_reco > 0) ) return false;
-    _cutFlow.at("08_TTBAR_Reco") += evtWeight;
-
-    Regions();
-    if( !((RegionID >= 0) && (RegionID <= 2)) ) return false;        // 0=DF-SR, 1=SF-SR, 2=DY-CR
+    _cutFlow.at("06_HEM_Filter") += evtWeight;
 
     bool GoodEvent = lumi_certificate.GoodLumiSection( _datasetName, run, luminosityBlock );
     if( !GoodEvent ) return false;                                      
     
     if( !Trigger() ) return false;                                              
-    _cutFlow.at("09_Selected") += evtWeight;
-
-    
-    //Get_Jet_Angular_Variables( 30 );
+    _cutFlow.at("07_Selected") += evtWeight;
 
 
-    _histograms1D.at("chel").Fill( ttbar_chel, evtWeight );     
- 
+    Weight_corrections();
 
-    //-------------------------------------------------------------------------
-    // Cut description
-    //-------------------------------------------------------------------------
-    //if( !(CutCondition) ) return false;           [Example]
-    //_cutFlow.at("CutName") += evtWeight;          [Example]
+    //cout << jet_puid_wgt << " " << jet_puid_wgt_2 << " " << endl;
 
     return true;
 }
@@ -142,11 +114,22 @@ bool HEPHero::TestRegion() {
 //-------------------------------------------------------------------------------------------------
 // Write your analysis code here
 //-------------------------------------------------------------------------------------------------
-void HEPHero::TestSelection() {
+void HEPHero::TestWgtSelection() {
+
+
+
+
+
+
+
+
+
+
+
 
 
     //======ASSIGN VALUES TO THE OUTPUT VARIABLES==================================================
-    //Test::variable1Name = 100;      [Example]
+    //TestWgt::variable1Name = 100;      [Example]
 
     //======FILL THE HISTOGRAMS====================================================================
     //_histograms1D.at("histogram1DName").Fill( var, evtWeight );               [Example]
@@ -165,7 +148,7 @@ void HEPHero::TestSelection() {
 //-------------------------------------------------------------------------------------------------
 // Produce systematic histograms
 //-------------------------------------------------------------------------------------------------
-void HEPHero::TestSystematic() {
+void HEPHero::TestWgtSystematic() {
 
     //FillSystematic( "histogram1DSysName", var, evtWeight );  [Example]
     //FillSystematic( "histogram2DSysName", var1, var2, evtWeight );  [Example]
@@ -175,7 +158,7 @@ void HEPHero::TestSystematic() {
 //-------------------------------------------------------------------------------------------------
 // Make efficiency plots
 //-------------------------------------------------------------------------------------------------
-void HEPHero::FinishTest() {
+void HEPHero::FinishTestWgt() {
 
     //MakeEfficiencyPlot( _histograms1D.at("Matched_pt"), _histograms1D.at("all_pt"), "Match_pt" );   [example]
 

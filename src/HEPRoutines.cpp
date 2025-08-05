@@ -37,6 +37,80 @@ void HEPHero::PreRoutines() {
         pileup_corr = pileup_set->at(SetName.c_str());
     }
 
+    //----ELECTRON ID------------------------------------------------------------------------------
+    if( apply_electron_wgt ){
+        auto electron_set = correction::CorrectionSet::from_file(electron_file.c_str());
+        electron_ID_corr = electron_set->at("UL-Electron-ID-SF");
+    }
+
+    //----MUON ID----------------------------------------------------------------------------------
+    if( apply_muon_wgt ){
+        auto muon_set = correction::CorrectionSet::from_file(muon_file.c_str());
+        
+        muon_RECO_corr = muon_set->at("NUM_TrackerMuons_DEN_genTracks");
+
+        string MuID_WP;
+        if( MUON_ID_WP == 0 ){
+            MuID_WP = "NUM_LooseID_DEN_TrackerMuons";
+        }else if( MUON_ID_WP == 1 ){
+            MuID_WP = "NUM_MediumID_DEN_TrackerMuons";
+        }else if( MUON_ID_WP == 2 ){
+            MuID_WP = "NUM_TightID_DEN_TrackerMuons";
+        }
+        muon_ID_corr = muon_set->at(MuID_WP);
+
+        string MuISO_WP;
+        if( MUON_ISO_WP == 0 ){
+            MuISO_WP = "NUM_LooseRelIso_DEN_LooseID"; // dumb value, not used
+        }else if( MUON_ISO_WP == 1 ){
+            MuISO_WP = "NUM_LooseRelIso_DEN_LooseID";
+        }else if( MUON_ISO_WP == 2 ){
+            MuISO_WP = "NUM_LooseRelIso_DEN_MediumID";
+        }else if( MUON_ISO_WP == 3 ){
+            MuISO_WP = "NUM_TightRelIso_DEN_MediumID";
+        }
+        muon_ISO_corr = muon_set->at(MuISO_WP);
+    }
+
+    //----JET PU ID--------------------------------------------------------------------------------
+    if( apply_jet_puid_wgt ){
+        auto jet_puid_set = correction::CorrectionSet::from_file(jet_puid_file.c_str());
+        jet_PUID_corr = jet_puid_set->at("PUJetID_eff");
+    }
+
+    //----B TAGGING--------------------------------------------------------------------------------
+    if( apply_btag_wgt ){
+
+        string dsName = _datasetName.substr(0,_datasetName.length()-5);
+
+        string dsNameDY = dsName.substr(0,10);
+        if( dsNameDY == "DYJetsToLL" ) dsName = "DYJetsToLL";
+
+        btag_eff.readFile(btag_eff_file);
+        if( dataset_group != "Data" ) btag_eff.calib(dsName, "TTTo2L2Nu");
+
+        // Choose btag algo
+        // https://btv-wiki.docs.cern.ch/ScaleFactors/
+        std::string btagAlgorithmMujets;
+        std::string btagAlgorithmIncl;
+        std::string btagAlgorithmComb;
+
+        if (JET_BTAG_WP >= 0 and JET_BTAG_WP <= 2) {
+            btagAlgorithmMujets = "deepJet_mujets";
+            btagAlgorithmIncl = "deepJet_incl";
+            btagAlgorithmComb = "deepJet_comb";
+        }
+        else if (JET_BTAG_WP >= 3 and JET_BTAG_WP <= 5) {
+            btagAlgorithmMujets = "deepCSV_mujets";
+            btagAlgorithmIncl = "deepCSV_incl";
+            btagAlgorithmComb = "deepCSV_comb";
+        }
+
+        auto btag_set = correction::CorrectionSet::from_file(btag_SF_file.c_str());
+        btag_bc_corr = btag_set->at(btagAlgorithmMujets.c_str());
+        btag_udsg_corr = btag_set->at(btagAlgorithmIncl.c_str());
+    }
+
     //----MET XY-------------------------------------------------------------------------
     if( apply_met_xy_corr ){
         auto met_xy_set = correction::CorrectionSet::from_file(met_xy_file.c_str());
@@ -101,6 +175,15 @@ void HEPHero::PreRoutines() {
     if( apply_muon_roc_corr ){
         muon_roc_corr.Initialize(muon_roc_file);
     }
+
+    //----TTBAR--------------------------------------------------------------------------
+    if( ttbar_pdf_file.size() > 0 && ttbar_resolution_file.size() > 0 ){
+        ttbarReco.addPDF(ttbar_pdf_file);
+        ttbarReco.addResolution(ttbar_resolution_file);
+    }
+
+    //----LUMI CERTIFICATE-------------------------------------------------------------------------
+    lumi_certificate.ReadFile(certificate_file);
 
 }
 

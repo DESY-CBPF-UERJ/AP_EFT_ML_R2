@@ -6,6 +6,8 @@
 #include "ML.h"
 #include "RoccoR.h"
 #include "correction.h"
+#include "ttbarReco_sonnenschein.h"
+#include "btageffanalyzer.h"
 
 
 using namespace std;
@@ -54,6 +56,26 @@ class HEPHero : public HEPBase {
         void SonnenscheinSelection();
         void SonnenscheinSystematic();
         void FinishSonnenschein();
+        void SetupCompareEff();
+        bool CompareEffRegion();
+        void CompareEffSelection();
+        void CompareEffSystematic();
+        void FinishCompareEff();
+        void SetupZrecoil();
+        bool ZrecoilRegion();
+        void ZrecoilSelection();
+        void ZrecoilSystematic();
+        void FinishZrecoil();
+        void SetupTestWgt();
+        bool TestWgtRegion();
+        void TestWgtSelection();
+        void TestWgtSystematic();
+        void FinishTestWgt();
+        void SetupBTagEffMap();
+        bool BTagEffMapRegion();
+        void BTagEffMapSelection();
+        void BTagEffMapSystematic();
+        void FinishBTagEffMap();
         // INSERT YOUR SELECTION HERE
 
 
@@ -67,6 +89,7 @@ class HEPHero : public HEPBase {
         //-------------------------------------------------------------------------------
 
         //----ANALYSIS-----------------------------------------------
+        void Regions();
         void METCorrection();
         void Get_ttbar_Variables();
         void LeptonSelection();
@@ -95,8 +118,12 @@ class HEPHero : public HEPBase {
 
         //----WEIGHTS------------------------------------------------
         float GetPileupWeight( float Pileup_nTrueInt, string sysType );
-
-
+        float GetPrefiringWeight( string sysID );
+        float GetElectronWeight( string sysID );
+        float GetMuonWeight( string sysID );
+        float GetJetPUIDWeight( string sysID );
+        float GetBTagWeight( string sysID, string sysFlavor = "", string sysType = "" );
+        
 
         //-------------------------------------------------------------------------------
         // Variables
@@ -113,6 +140,7 @@ class HEPHero : public HEPBase {
         int ttbar_reco_v2;
         float ttbar_mass_v2;
         float ttbar_score_v2;
+        float ttbar_chel;
 
         //----SELECTION----------------------------------------------
         float JET_ETA_CUT;
@@ -134,12 +162,9 @@ class HEPHero : public HEPBase {
         int   MUON_ISO_WP;
 
         float LEADING_LEP_PT_CUT;
-        float LEPLEP_PT_CUT;
+        float LEPLEP_MASS_CUT;
         float MET_CUT;
-        float LEPLEP_DR_CUT;
         float LEPLEP_DM_CUT;
-        float MET_LEPLEP_DPHI_CUT;
-        float MET_LEPLEP_MT_CUT;
 
         //----TRIGGERS-----------------------------------------------
         bool HLT_SingleEle;
@@ -157,6 +182,7 @@ class HEPHero : public HEPBase {
         int Nbjets30;
         int Njets;
         int Njets30;
+        int Njets_below50;
         int Njets_forward;
         int Njets30_forward;
         int Njets_ISR;
@@ -189,8 +215,10 @@ class HEPHero : public HEPBase {
         TLorentzVector lep_4;
         float LeadingLep_pt;
         float LeadingLep_eta;
+        float LeadingLep_charge;
         float TrailingLep_pt;
         float TrailingLep_eta;
+        float TrailingLep_charge;
         Float_t Muon_raw_pt[50];
 
         //----LEPLEP & MET-------------------------------------------
@@ -269,6 +297,39 @@ class HEPHero : public HEPBase {
         string  pileup_file;
         shared_ptr<correction::Correction const> pileup_corr;
 
+        //----PREFIRING------------------------------------
+        bool    apply_prefiring_wgt;
+        double  prefiring_wgt;
+
+        //----ELECTRON ID------------------------------------
+        bool    apply_electron_wgt;
+        double  electron_wgt;
+        string  electron_file;
+        shared_ptr<correction::Correction const> electron_ID_corr;
+
+        //----MUON ID--------------------------------------
+        bool    apply_muon_wgt;
+        double  muon_wgt;
+        string  muon_file;
+        shared_ptr<correction::Correction const> muon_RECO_corr;
+        shared_ptr<correction::Correction const> muon_ID_corr;
+        shared_ptr<correction::Correction const> muon_ISO_corr;
+
+        //----JET PU ID------------------------------------
+        bool    apply_jet_puid_wgt;
+        double  jet_puid_wgt;
+        string  jet_puid_file;
+        shared_ptr<correction::Correction const> jet_PUID_corr;
+
+        //----B TAGGING------------------------------------
+        bool    apply_btag_wgt;
+        double  btag_wgt;
+        string  btag_eff_file;
+        string  btag_SF_file;
+        BTagEffAnalyzer btag_eff;
+        shared_ptr<correction::Correction const> btag_bc_corr;
+        shared_ptr<correction::Correction const> btag_udsg_corr;
+
         //----JERC---------------------------------------------------
         bool apply_jer_corr;
         string jerc_file;
@@ -298,6 +359,15 @@ class HEPHero : public HEPBase {
         bool apply_muon_roc_corr;
         Rochester_Corrector muon_roc_corr;
         string muon_roc_file;
+
+        //----TTBAR--------------------------------------------------
+        string ttbar_pdf_file;
+        string ttbar_resolution_file;
+        ttbarReconstruction ttbarReco;
+
+        //----LUMI CERTIFICATE-----------------------------
+        string  certificate_file;
+        LumiSections lumi_certificate;
 
     
     //=============================================================================================

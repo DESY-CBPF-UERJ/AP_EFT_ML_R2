@@ -1,7 +1,30 @@
 #include "HEPHero.h"
 #include "lester_mt2_bisect.h"
 #include "ttbarReco_sonnenschein_opendata.h"
+//#include "ttbarReco_sonnenschein_gilson.h"
 #include "ttbarReco_sonnenschein_desy.h"
+
+//---------------------------------------------------------------------------------------------
+// Regions
+//---------------------------------------------------------------------------------------------
+void HEPHero::Regions(){
+    RegionID = -1;
+
+    if( (RecoLepID > 100)
+      ){                                        // [DF-SR]
+        RegionID = 0;
+    }
+    else if( (RecoLepID < 100) && 
+        (LepLep_deltaM > LEPLEP_DM_CUT)
+      ){                                        // [SF-SR]
+        RegionID = 1;
+    }
+    else if( (RecoLepID < 100) &&
+        (LepLep_deltaM <= LEPLEP_DM_CUT)
+      ){                                        // [DY-CR]
+        RegionID = 2;
+    }
+}
 
 //-------------------------------------------------------------------------------------------------
 // Calculate ttbar variables
@@ -26,10 +49,18 @@ void HEPHero::Get_ttbar_Variables(){
         vecJets.push_back(vecJet);
     }
 
-    TLorentzVector t;
-    TLorentzVector tbar;
-    TH1D* hInacc = new TH1D("hInacc", "KinReco inaccuracy", 1000, 0.0, 100.0);
-    TH1D* hAmbig = new TH1D("hAmbig", "KinReco ambiguity", 100, 0.0, 100.0);
+    TLorentzVector lm;
+    TLorentzVector lp;
+    if( LeadingLep_charge < 0 ){
+        lm = lep_1;
+        lp = lep_2;
+    }else{
+        lm = lep_2;
+        lp = lep_1;
+    }
+
+    TLorentzVector met;
+    met.SetPxPyPzE ( MET_pt*cos(MET_phi) , MET_pt*sin(MET_phi) , 0., MET_pt);
 
     ttbar_reco = 0;
     ttbar_score = 0.;
@@ -37,20 +68,37 @@ void HEPHero::Get_ttbar_Variables(){
     ttbar_reco_v2 = 0;
     ttbar_score_v2 = 0.;
     ttbar_mass_v2 = 0.;
-
-
+    
     if(selectedJet.size() >= 2){
-        ttbar_reco = KinRecoDilepton(lep_1, lep_2, vecJets, MET_pt*cos(MET_phi), MET_pt*sin(MET_phi), t, tbar, ttbar_score, hInacc, hAmbig);
-        ttbar_mass = (t+tbar).M();
+        ttbarReco.KinRecoDilepton(lm, lp, vecJets, met, true);
+        ttbar_reco = ttbarReco.solved;
+        ttbar_mass = (ttbarReco.t+ttbarReco.tbar).M();
+
+        //TLorentzVector t;
+        //TLorentzVector tbar;
+        //TH1D* hInacc = new TH1D("hInacc", "KinReco inaccuracy", 1000, 0.0, 100.0);
+        //TH1D* hAmbig = new TH1D("hAmbig", "KinReco ambiguity", 100, 0.0, 100.0);
+        //ttbar_reco = KinRecoDilepton(lm, lp, vecJets, MET_pt*cos(MET_phi), MET_pt*sin(MET_phi), t, tbar, ttbar_score, hInacc, hAmbig);//, nu_energy_pdf_file);
+        //ttbar_mass = (t+tbar).M();
     }
+    
+    TLorentzVector t = ttbarReco.t;
+    TLorentzVector tbar = ttbarReco.tbar;
+    
+    spin_corr = compute_spin_correlation(t.Pt(), t.Eta(), t.Phi(), t.M(),              // top
+                                         tbar.Pt(), tbar.Eta(), tbar.Phi(), tbar.M(),  // antitop
+                                         lm.Pt(), lm.Eta(), lm.Phi(), lm.M(),          // lepton
+                                         lp.Pt(), lp.Eta(), lp.Phi(), lp.M());         // antilepton
+    static const int icHel = index_with_key(spin_corr, "cHel");
+    ttbar_chel = spin_corr[icHel].second;
 
-
+    /*
     // ---------- DESY  ttbar_2016 code ----------------------------
     if(selectedJet.size() >= 2){
+        TLorentzVector t;
+        TLorentzVector tbar;
         KinematicReconstruction myTTbarObject;
-        TLorentzVector met;
-        met.SetPxPyPzE ( MET_pt*cos(MET_phi) , MET_pt*sin(MET_phi) , 0., MET_pt);
-        myTTbarObject.kinReco( lep_1, lep_2, vecJets, met ) ; // To turn on/off the smearing process, you have to change the NoSmearingFlag in the "KinematicReconstruction.h". Remember that using smearinf process, you need a root file with infotmation about the resolutions.
+        myTTbarObject.kinReco( lm, lp, vecJets, met ) ; // To turn on/off the smearing process, you have to change the NoSmearingFlag in the "KinematicReconstruction.h". Remember that using smearinf process, you need a root file with infotmation about the resolutions.
         if ( myTTbarObject.getNSol() > 0 ){
             ttbar_reco_v2 = 1;
             ttbar_score_v2 = myTTbarObject.getWeight( );
@@ -59,6 +107,8 @@ void HEPHero::Get_ttbar_Variables(){
             ttbar_mass_v2 = (t+tbar).M();
         }
     }
+    */
+    
 
 }
 
@@ -136,6 +186,7 @@ void HEPHero::JetSelection(){
     Nbjets30 = 0;
     Njets = 0;
     Njets30 = 0;
+    Njets_below50 = 0;
     Njets_forward = 0;
     Njets_ISR = 0;
     NPUjets = 0;
@@ -163,6 +214,7 @@ void HEPHero::JetSelection(){
         Jet.SetPtEtaPhiE(Jet_pt[ijet], Jet_eta[ijet], Jet_phi[ijet], 0);
 
         Njets += 1;
+        if( Jet_pt[ijet] < 50 ) Njets_below50 += 1;
         if( PileupJet( ijet ) ) NPUjets += 1;
         HT += Jet_pt[ijet];
         HPx += Jet.Px();
@@ -1090,8 +1142,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedEle.at(1);
         LeadingLep_pt = Electron_pt[IdxLeadingLep];
         LeadingLep_eta = Electron_eta[IdxLeadingLep];
+        LeadingLep_charge = Electron_charge[IdxLeadingLep];
         TrailingLep_pt = Electron_pt[IdxTrailingLep];
         TrailingLep_eta = Electron_eta[IdxTrailingLep];
+        TrailingLep_charge = Electron_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Electron_pt[IdxLeadingLep], Electron_eta[IdxLeadingLep], Electron_phi[IdxLeadingLep], Electron_pdg_mass);
         lep_2.SetPtEtaPhiM(Electron_pt[IdxTrailingLep], Electron_eta[IdxTrailingLep], Electron_phi[IdxTrailingLep], Electron_pdg_mass);
     }
@@ -1100,8 +1154,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedMu.at(1);
         LeadingLep_pt = Muon_pt[IdxLeadingLep];
         LeadingLep_eta = Muon_eta[IdxLeadingLep];
+        LeadingLep_charge = Muon_charge[IdxLeadingLep];
         TrailingLep_pt = Muon_pt[IdxTrailingLep];
         TrailingLep_eta = Muon_eta[IdxTrailingLep];
+        TrailingLep_charge = Muon_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Muon_pt[IdxLeadingLep], Muon_eta[IdxLeadingLep], Muon_phi[IdxLeadingLep], Muon_pdg_mass);
         lep_2.SetPtEtaPhiM(Muon_pt[IdxTrailingLep], Muon_eta[IdxTrailingLep], Muon_phi[IdxTrailingLep], Muon_pdg_mass);
     }
@@ -1110,7 +1166,9 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedMu.at(0);
         LeadingLep_pt = Electron_pt[IdxLeadingLep];
         LeadingLep_eta = Electron_eta[IdxLeadingLep];
+        LeadingLep_charge = Electron_charge[IdxLeadingLep];
         TrailingLep_pt = Muon_pt[IdxTrailingLep];
+        TrailingLep_charge = Muon_charge[IdxTrailingLep];
         TrailingLep_eta = Muon_eta[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Electron_pt[IdxLeadingLep], Electron_eta[IdxLeadingLep], Electron_phi[IdxLeadingLep], Electron_pdg_mass);
         lep_2.SetPtEtaPhiM(Muon_pt[IdxTrailingLep], Muon_eta[IdxTrailingLep], Muon_phi[IdxTrailingLep], Muon_pdg_mass);
@@ -1120,8 +1178,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedEle.at(0);
         LeadingLep_pt = Muon_pt[IdxLeadingLep];
         LeadingLep_eta = Muon_eta[IdxLeadingLep];
+        LeadingLep_charge = Muon_charge[IdxLeadingLep];
         TrailingLep_pt = Electron_pt[IdxTrailingLep];
         TrailingLep_eta = Electron_eta[IdxTrailingLep];
+        TrailingLep_charge = Electron_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Muon_pt[IdxLeadingLep], Muon_eta[IdxLeadingLep], Muon_phi[IdxLeadingLep], Muon_pdg_mass);
         lep_2.SetPtEtaPhiM(Electron_pt[IdxTrailingLep], Electron_eta[IdxTrailingLep], Electron_phi[IdxTrailingLep], Electron_pdg_mass);
     }
@@ -1130,8 +1190,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedEle.at(1);
         LeadingLep_pt = Electron_pt[IdxLeadingLep];
         LeadingLep_eta = Electron_eta[IdxLeadingLep];
+        LeadingLep_charge = Electron_charge[IdxLeadingLep];
         TrailingLep_pt = Electron_pt[IdxTrailingLep];
         TrailingLep_eta = Electron_eta[IdxTrailingLep];
+        TrailingLep_charge = Electron_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Electron_pt[IdxLeadingLep], Electron_eta[IdxLeadingLep], Electron_phi[IdxLeadingLep], Electron_pdg_mass);
         lep_2.SetPtEtaPhiM(Electron_pt[IdxTrailingLep], Electron_eta[IdxTrailingLep], Electron_phi[IdxTrailingLep], Electron_pdg_mass);
     }
@@ -1140,8 +1202,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedMu.at(1);
         LeadingLep_pt = Muon_pt[IdxLeadingLep];
         LeadingLep_eta = Muon_eta[IdxLeadingLep];
+        LeadingLep_charge = Muon_charge[IdxLeadingLep];
         TrailingLep_pt = Muon_pt[IdxTrailingLep];
         TrailingLep_eta = Muon_eta[IdxTrailingLep];
+        TrailingLep_charge = Muon_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Muon_pt[IdxLeadingLep], Muon_eta[IdxLeadingLep], Muon_phi[IdxLeadingLep], Muon_pdg_mass);
         lep_2.SetPtEtaPhiM(Muon_pt[IdxTrailingLep], Muon_eta[IdxTrailingLep], Muon_phi[IdxTrailingLep], Muon_pdg_mass);
     }
@@ -1150,8 +1214,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedEle.at(2);
         LeadingLep_pt = Electron_pt[IdxLeadingLep];
         LeadingLep_eta = Electron_eta[IdxLeadingLep];
+        LeadingLep_charge = Electron_charge[IdxLeadingLep];
         TrailingLep_pt = Electron_pt[IdxTrailingLep];
         TrailingLep_eta = Electron_eta[IdxTrailingLep];
+        TrailingLep_charge = Electron_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Electron_pt[IdxLeadingLep], Electron_eta[IdxLeadingLep], Electron_phi[IdxLeadingLep], Electron_pdg_mass);
         lep_2.SetPtEtaPhiM(Electron_pt[IdxTrailingLep], Electron_eta[IdxTrailingLep], Electron_phi[IdxTrailingLep], Electron_pdg_mass);
     }
@@ -1160,8 +1226,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedMu.at(2);
         LeadingLep_pt = Muon_pt[IdxLeadingLep];
         LeadingLep_eta = Muon_eta[IdxLeadingLep];
+        LeadingLep_charge = Muon_charge[IdxLeadingLep];
         TrailingLep_pt = Muon_pt[IdxTrailingLep];
         TrailingLep_eta = Muon_eta[IdxTrailingLep];
+        TrailingLep_charge = Muon_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Muon_pt[IdxLeadingLep], Muon_eta[IdxLeadingLep], Muon_phi[IdxLeadingLep], Muon_pdg_mass);
         lep_2.SetPtEtaPhiM(Muon_pt[IdxTrailingLep], Muon_eta[IdxTrailingLep], Muon_phi[IdxTrailingLep], Muon_pdg_mass);
     }
@@ -1170,8 +1238,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedEle.at(2);
         LeadingLep_pt = Electron_pt[IdxLeadingLep];
         LeadingLep_eta = Electron_eta[IdxLeadingLep];
+        LeadingLep_charge = Electron_charge[IdxLeadingLep];
         TrailingLep_pt = Electron_pt[IdxTrailingLep];
         TrailingLep_eta = Electron_eta[IdxTrailingLep];
+        TrailingLep_charge = Electron_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Electron_pt[IdxLeadingLep], Electron_eta[IdxLeadingLep], Electron_phi[IdxLeadingLep], Electron_pdg_mass);
         lep_2.SetPtEtaPhiM(Electron_pt[IdxTrailingLep], Electron_eta[IdxTrailingLep], Electron_phi[IdxTrailingLep], Electron_pdg_mass);
     }
@@ -1180,8 +1250,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedMu.at(2);
         LeadingLep_pt = Muon_pt[IdxLeadingLep];
         LeadingLep_eta = Muon_eta[IdxLeadingLep];
+        LeadingLep_charge = Muon_charge[IdxLeadingLep];
         TrailingLep_pt = Muon_pt[IdxTrailingLep];
         TrailingLep_eta = Muon_eta[IdxTrailingLep];
+        TrailingLep_charge = Muon_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Muon_pt[IdxLeadingLep], Muon_eta[IdxLeadingLep], Muon_phi[IdxLeadingLep], Muon_pdg_mass);
         lep_2.SetPtEtaPhiM(Muon_pt[IdxTrailingLep], Muon_eta[IdxTrailingLep], Muon_phi[IdxTrailingLep], Muon_pdg_mass);
     }
@@ -1190,8 +1262,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedEle.at(3);
         LeadingLep_pt = Electron_pt[IdxLeadingLep];
         LeadingLep_eta = Electron_eta[IdxLeadingLep];
+        LeadingLep_charge = Electron_charge[IdxLeadingLep];
         TrailingLep_pt = Electron_pt[IdxTrailingLep];
         TrailingLep_eta = Electron_eta[IdxTrailingLep];
+        TrailingLep_charge = Electron_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Electron_pt[IdxLeadingLep], Electron_eta[IdxLeadingLep], Electron_phi[IdxLeadingLep], Electron_pdg_mass);
         lep_2.SetPtEtaPhiM(Electron_pt[IdxTrailingLep], Electron_eta[IdxTrailingLep], Electron_phi[IdxTrailingLep], Electron_pdg_mass);
     }
@@ -1200,8 +1274,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedMu.at(3);
         LeadingLep_pt = Muon_pt[IdxLeadingLep];
         LeadingLep_eta = Muon_eta[IdxLeadingLep];
+        LeadingLep_charge = Muon_charge[IdxLeadingLep];
         TrailingLep_pt = Muon_pt[IdxTrailingLep];
         TrailingLep_eta = Muon_eta[IdxTrailingLep];
+        TrailingLep_charge = Muon_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Muon_pt[IdxLeadingLep], Muon_eta[IdxLeadingLep], Muon_phi[IdxLeadingLep], Muon_pdg_mass);
         lep_2.SetPtEtaPhiM(Muon_pt[IdxTrailingLep], Muon_eta[IdxTrailingLep], Muon_phi[IdxTrailingLep], Muon_pdg_mass);
     }
@@ -1210,8 +1286,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedEle.at(3);
         LeadingLep_pt = Electron_pt[IdxLeadingLep];
         LeadingLep_eta = Electron_eta[IdxLeadingLep];
+        LeadingLep_charge = Electron_charge[IdxLeadingLep];
         TrailingLep_pt = Electron_pt[IdxTrailingLep];
         TrailingLep_eta = Electron_eta[IdxTrailingLep];
+        TrailingLep_charge = Electron_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Electron_pt[IdxLeadingLep], Electron_eta[IdxLeadingLep], Electron_phi[IdxLeadingLep], Electron_pdg_mass);
         lep_2.SetPtEtaPhiM(Electron_pt[IdxTrailingLep], Electron_eta[IdxTrailingLep], Electron_phi[IdxTrailingLep], Electron_pdg_mass);
     }
@@ -1220,8 +1298,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedMu.at(3);
         LeadingLep_pt = Muon_pt[IdxLeadingLep];
         LeadingLep_eta = Muon_eta[IdxLeadingLep];
+        LeadingLep_charge = Muon_charge[IdxLeadingLep];
         TrailingLep_pt = Muon_pt[IdxTrailingLep];
         TrailingLep_eta = Muon_eta[IdxTrailingLep];
+        TrailingLep_charge = Muon_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Muon_pt[IdxLeadingLep], Muon_eta[IdxLeadingLep], Muon_phi[IdxLeadingLep], Muon_pdg_mass);
         lep_2.SetPtEtaPhiM(Muon_pt[IdxTrailingLep], Muon_eta[IdxTrailingLep], Muon_phi[IdxTrailingLep], Muon_pdg_mass);
     }
@@ -1230,8 +1310,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedEle.at(3);
         LeadingLep_pt = Electron_pt[IdxLeadingLep];
         LeadingLep_eta = Electron_eta[IdxLeadingLep];
+        LeadingLep_charge = Electron_charge[IdxLeadingLep];
         TrailingLep_pt = Electron_pt[IdxTrailingLep];
         TrailingLep_eta = Electron_eta[IdxTrailingLep];
+        TrailingLep_charge = Electron_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Electron_pt[IdxLeadingLep], Electron_eta[IdxLeadingLep], Electron_phi[IdxLeadingLep], Electron_pdg_mass);
         lep_2.SetPtEtaPhiM(Electron_pt[IdxTrailingLep], Electron_eta[IdxTrailingLep], Electron_phi[IdxTrailingLep], Electron_pdg_mass);
     }
@@ -1240,8 +1322,10 @@ void HEPHero::Get_LeadingAndTrailing_Lepton_Variables(){
         IdxTrailingLep = selectedMu.at(3);
         LeadingLep_pt = Muon_pt[IdxLeadingLep];
         LeadingLep_eta = Muon_eta[IdxLeadingLep];
+        LeadingLep_charge = Muon_charge[IdxLeadingLep];
         TrailingLep_pt = Muon_pt[IdxTrailingLep];
         TrailingLep_eta = Muon_eta[IdxTrailingLep];
+        TrailingLep_charge = Muon_charge[IdxTrailingLep];
         lep_1.SetPtEtaPhiM(Muon_pt[IdxLeadingLep], Muon_eta[IdxLeadingLep], Muon_phi[IdxLeadingLep], Muon_pdg_mass);
         lep_2.SetPtEtaPhiM(Muon_pt[IdxTrailingLep], Muon_eta[IdxTrailingLep], Muon_phi[IdxTrailingLep], Muon_pdg_mass);
     }

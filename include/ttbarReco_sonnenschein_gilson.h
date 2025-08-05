@@ -8,8 +8,8 @@
 // additional information can be found in DESY-THESIS-2012-037
 // https://github.com/cms-opendata-validation/2011-doubleelectron-doublemu-mueg-ttbar/blob/master/PostAnalyzer/kinReco.h
 
-#ifndef TTBAR_KINRECO_H
-#define TTBAR_KINRECO_H
+#ifndef TTBAR_KINRECO_GILSON_H
+#define TTBAR_KINRECO_GILSON_H
 
 // C++ library or ROOT header files
 #include <TMath.h>
@@ -18,6 +18,8 @@
 #include <TH1D.h>
 #include <vector>
 #include <complex>
+#include "rapidjson/document.h"
+#include "rapidjson/filereadstream.h"
 
 // debugging level (0 for silence, > 0 for some messages)
 int gDebug = 0;
@@ -58,7 +60,7 @@ struct ZSolutionKinRecoDilepton
 // For math, see Lars Sonnenschein's paper Phys.Rev. D73 (2006) 054015 [Erratum Phys.Rev. D73 (2006) 054015]
 ZSolutionKinRecoDilepton* SolveKinRecoDilepton(const TLorentzVector& lm, const TLorentzVector& lp, 
   const TLorentzVector& b, const TLorentzVector& bbar, const double metX, const double metY, 
-  TH1D* hInacc = NULL, int* ambiguity = NULL)
+  TH1D* hInacc = NULL, int* ambiguity = NULL, string neutrino_pdf_file = "None")
 {
   // constants
   const double massW = 80.4; // W boson mass
@@ -254,9 +256,67 @@ ZSolutionKinRecoDilepton* SolveKinRecoDilepton(const TLorentzVector& lm, const T
       if(gDebug)
         printf("inaccuracy: %f\n", inaccuracy);
     }
+
+    // New calculation from Gilson
+    rapidjson::Document nu_energy_pdf;
+    FILE *fp_pdf = fopen(neutrino_pdf_file.c_str(), "r"); 
+    char buf_pdf[0XFFFF];
+    //FileReadStream(FILE *fp, char *buffer, std::size_t bufferSize)
+    rapidjson::FileReadStream input_pdf(fp_pdf, buf_pdf, sizeof(buf_pdf));
+    nu_energy_pdf.ParseStream(input_pdf);  
+
+    rapidjson::Value& energy_bins = nu_energy_pdf["energy_bins"];
+    assert(energy_bins.IsArray());
+    rapidjson::Value& PDF = nu_energy_pdf["pdf"];
+    assert(PDF.IsArray());  
+    
+    float nu_energy = nu.E();
+    float pdf_value = 0;
+    if( nu_energy < energy_bins[0].GetFloat() ){
+        pdf_value = 0;
+    }else if( nu_energy >= energy_bins[energy_bins.Size()-1].GetFloat() ){
+        pdf_value = 0;
+    }else{
+        for (int inuE = 0; inuE < energy_bins.Size()-1; inuE++) {
+            float x_s = energy_bins[inuE].GetFloat();
+            float x_e = energy_bins[inuE+1].GetFloat();
+            if( (nu_energy >= x_s) && (nu_energy < x_e) ){
+                float y_s = PDF[inuE].GetFloat();
+                float y_e = PDF[inuE+1].GetFloat();
+                float a = (y_e-y_s)/(x_e-x_s);
+                float b = y_s - a*x_s;
+                pdf_value = a*nu_energy+b;
+                break;
+            }
+        }
+    }
+    double wnu = pdf_value; 
+
+    nu_energy = nubar.E();
+    pdf_value = 0;
+    if( nu_energy < energy_bins[0].GetFloat() ){
+        pdf_value = 0;
+    }else if( nu_energy >= energy_bins[energy_bins.Size()-1].GetFloat() ){
+        pdf_value = 0;
+    }else{
+        for (int inuE = 0; inuE < energy_bins.Size()-1; inuE++) {
+            float x_s = energy_bins[inuE].GetFloat();
+            float x_e = energy_bins[inuE+1].GetFloat();
+            if( (nu_energy >= x_s) && (nu_energy < x_e) ){
+                float y_s = PDF[inuE].GetFloat();
+                float y_e = PDF[inuE+1].GetFloat();
+                float a = (y_e-y_s)/(x_e-x_s);
+                float b = y_s - a*x_s;
+                pdf_value = a*nu_energy+b;
+                break;
+            }
+        }
+    }
+    double wnubar = pdf_value;
+      
     // calculate weight according to nu and nubar momenta (see DESY-THESIS-2012-037)
-    double wnu = TMath::Landau(nu.E(), landauMean, landauSigma);
-    double wnubar = TMath::Landau(nubar.E(), landauMean, landauSigma);
+    //double wnu = TMath::Landau(nu.E(), landauMean, landauSigma);
+    //double wnubar = TMath::Landau(nubar.E(), landauMean, landauSigma);
     double weight = wnu * wnubar;
     if(gDebug)
       printf("nu e: %f %f  weight: %f\n", nu.E(), nubar.E(), weight);
@@ -302,7 +362,7 @@ ZSolutionKinRecoDilepton* SolveKinRecoDilepton(const TLorentzVector& lm, const T
 // Returns 1 for successfull kinreco, 0 otherwise
 // 
 int KinRecoDilepton(const TLorentzVector& lm, const TLorentzVector& lp, const std::vector<TLorentzVector>& jets,
-  const double metX, const double metY, TLorentzVector& t, TLorentzVector& tbar, float& finalWeight, TH1D* hInacc = NULL, TH1D* hAmbig = NULL)
+  const double metX, const double metY, TLorentzVector& t, TLorentzVector& tbar, float& finalWeight, TH1D* hInacc = NULL, TH1D* hAmbig = NULL, string neutrino_pdf_file = "None")
 {
   // solution status (to be returned)
   int solved = 0;
@@ -359,7 +419,7 @@ int KinRecoDilepton(const TLorentzVector& lm, const TLorentzVector& lp, const st
         jetBbar = *jet2;
       // get solution
       TLorentzVector tThis, tbarThis;
-      ZSolutionKinRecoDilepton* solution = SolveKinRecoDilepton(lm, lp, jetB, jetBbar, metX, metY, hInacc, ambiguity);
+      ZSolutionKinRecoDilepton* solution = SolveKinRecoDilepton(lm, lp, jetB, jetBbar, metX, metY, hInacc, ambiguity, neutrino_pdf_file);
       if(!solution || solution->zWeight < 0)
         continue;
       // set b-tagging number
@@ -409,40 +469,6 @@ int KinRecoDilepton(const TLorentzVector& lm, const TLorentzVector& lp, const st
     delete (*it);
   return solved;
 }
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
-// routines below are not used in the analysis, 
-// available for debugging purpose
-
-// to generate decay a -> b, c
-void Decay(const TLorentzVector& a, const double mb, const double mc, const double r1, const double r2, 
-           TLorentzVector& b, TLorentzVector& c)
-{
-  double ma = a.M();
-  double ma2 = ma * ma;
-  double mb2 = mb * mb;
-  double mc2 = mc * mc;
-  double num = TMath::Power(ma2 - mb2 - mc2, 2.0) - 4 * mb2 * mc2;
-  double denom = 4 * ma2;
-  double p = TMath::Sqrt(num / denom);
-  printf("p = %f\n", p);
-  printf("sqrt(p2 + mb2) + sqrt(p2 + mc2) = a.E(): %f + %f = %f\n", TMath::Sqrt(p * p + mb2), TMath::Sqrt(p * p + mc2), a.M());
-  double theta = TMath::Pi() * r1;
-  double phi = 2 * TMath::Pi() * r2;
-  b.SetXYZM(p * TMath::Cos(theta) * TMath::Cos(phi), p * TMath::Cos(theta) * TMath::Sin(phi), p * TMath::Sin(theta), mb);
-  c.SetXYZM(- p * TMath::Cos(theta) * TMath::Cos(phi), - p * TMath::Cos(theta) * TMath::Sin(phi), - p * TMath::Sin(theta), mc);
-  //b = b + a;
-  //c = c + a;
-  TVector3 boost = a.BoostVector();
-  b.Boost(boost);
-  c.Boost(boost);
-}
-
-// print four vector contents
-void PrintTLV(const TString& str, const TLorentzVector& t)
-{
-  printf("%10s%10.3f%10.3f%10.3f%10.3f\n", str.Data(), t.X(), t.Y(), t.Z(), t.M());
-}
 
 #endif

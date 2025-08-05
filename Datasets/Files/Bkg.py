@@ -21,6 +21,7 @@ datasets = [
 ["DYJetsToLL_Pt-Inclusive",     "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/"],
 ["DYJetsToLL_Pt-0To3",          "/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/"],
 ["DYJetsToLL_PtZ-3To50",        "/DYJetsToLL_LHEFilterPtZ-0To50_MatchEWPDG20_TuneCP5_13TeV-amcatnloFXFX-pythia8/"],
+["DYJetsToLL_M-10to50",         "/DYJetsToLL_M-10to50_TuneCP5_13TeV-amcatnloFXFX-pythia8/"],
 ["TTTo2L2Nu",                   "/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/"],
 ["TTToSemiLeptonic",            "/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/"],
 ["ST_tW_antitop",               "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/"],
@@ -52,5 +53,5 @@ datasets = [
 ["TTZToQQ",                     "/TTZToQQ_TuneCP5_13TeV-amcatnlo-pythia8/"],
 ["TTZToLL",                     "/TTZToLL_M-1to10_TuneCP5_13TeV-amcatnlo-pythia8/"],
 ["TTZToNuNu",                   "/TTZToNuNu_TuneCP5_13TeV-amcatnlo-pythia8/"],
-["tZq_ll",                      "/tZq_ll_4f_ckm_NLO_TuneCP5_erdON_13TeV-amcatnlo-pythia8/"],
+["tZq_ll",                      "/tZq_ll_4f_ckm_NLO_TuneCP5_13TeV-amcatnlo-pythia8/"],
 ]

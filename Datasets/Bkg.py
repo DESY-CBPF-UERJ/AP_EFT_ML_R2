@@ -23,17 +23,16 @@ paths["0_18"] = analysis+'/Datasets/Files/bkg_18/dti_0/'+nano_version+'/'
 # Source[new2] > > https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
 # Source[new3] > > https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SingleTopRefXsec
 b_ds_info = { # [DatasetName, Production ID, PROC_XSEC[pb], XSEC_UNC[pb], XSEC_Accuracy]
-"DYPt0To50": [
+"DY": [
+    #["DYJetsToLL_Pt-Inclusive",             '20',       6077.22,            122.45,             '[new1]NNLO'],
+    ["DYJetsToLL_M-10to50",                 '20',       20490.0,            182.2,              'NLO'],
     ["DYJetsToLL_Pt-0To3",                  '20',       6077.22,            122.45,             '[new1]NNLO'],
     ["DYJetsToLL_PtZ-3To50",                '20',       1414.0,             0,                  '[new1]NNLO*'],
-],
-
-"DYPt50ToInf": [
-    ["DYJetsToLL_PtZ-50To100",              '21',       378.97,             0,                  '[new1]NNLO*'],
-    ["DYJetsToLL_PtZ-100To250",             '21',       93.1366,            0,                  '[new1]NNLO*'],
-    ["DYJetsToLL_PtZ-250To400",             '21',       3.7093,             0,                  '[new1]NNLO*'],
-    ["DYJetsToLL_PtZ-400To650",             '21',       0.5150,             0,                  '[new1]NNLO*'],
-    ["DYJetsToLL_PtZ-650ToInf",             '21',       0.048934,           0,                  '[new1]NNLO*'],
+    ["DYJetsToLL_PtZ-50To100",              '20',       378.97,             0,                  '[new1]NNLO*'],
+    ["DYJetsToLL_PtZ-100To250",             '20',       93.1366,            0,                  '[new1]NNLO*'],
+    ["DYJetsToLL_PtZ-250To400",             '20',       3.7093,             0,                  '[new1]NNLO*'],
+    ["DYJetsToLL_PtZ-400To650",             '20',       0.5150,             0,                  '[new1]NNLO*'],
+    ["DYJetsToLL_PtZ-650ToInf",             '20',       0.048934,           0,                  '[new1]NNLO*'],
 ],
 
 "TTFullLep": [
